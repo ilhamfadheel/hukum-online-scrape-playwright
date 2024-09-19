@@ -1,0 +1,13 @@
+{
+  "name": "hukum-online-scrape-node",
+  "version": "1.0.0",
+  "description": "NodeJS Web scraper for Hukum Online using Playwright",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "playwright": "^1.47.1"
+  }
+}
