@@ -19,11 +19,11 @@ To install this project, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/hukum-online-scrape-node.git
+   git clone https://github.com/ilhamfadheel/hukum-online-scrape-playwright.git
    ```
 2. Navigate to the project directory:
    ```
-   cd hukum-online-scrape-node
+   cd hukum-online-scrape-playwright
    ```
 3. Install the dependencies:
    ```
