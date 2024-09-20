@@ -34,7 +34,7 @@ export async function downloadFromWebsite(url) {
             throw new Error('Download option not found');
         }
 
-        // there is a delay before the download option is clickable
+        // Delay before the download button is clickable
         await page.waitForTimeout(5000);
         await downloadButton.click();
 
@@ -42,37 +42,56 @@ export async function downloadFromWebsite(url) {
         const downloadPromise = page.waitForEvent('download');
         const download = await downloadPromise;
 
+        // Get the file size in bytes from stream
+        const fileSizeInBytes = await download.createReadStream().then(stream => {
+            return new Promise((resolve) => {
+                let size = 0;
+                stream.on('data', (chunk) => {
+                    size += chunk.length;
+                });
+                stream.on('end', () => {
+                    resolve(size);
+                });
+            });
+        });
+
+        const fileSizeInKB = Number((fileSizeInBytes / 1024).toFixed(0));  // File size in KB
+
         // Create a progress bar
         const progressBar = new cliProgress.SingleBar({
-            format: `Downloading ${download.suggestedFilename()} [{bar}] {percentage}% | {value}/{total} KB | Speed: {speed} KB/s`,
+            format: `Downloading ${download.suggestedFilename()} [{bar}] {percentage}% | {value}/{total} KB | Speed: {speed} MB/s`,
             barCompleteChar: '\u2588',
             barIncompleteChar: '\u2591',
             hideCursor: true
         });
 
         let downloadedBytes = 0;
-        const startTime = Date.now();
+        let startTime = Date.now();
 
         // Start the progress bar
-        progressBar.start(100, 0, {
-            speed: "N/A"
+        progressBar.start(fileSizeInKB, 0, {
+            speed: "0.00",
+            duration_formatted: "0s"
         });
 
         // Set up the progress listener
         const stream = await download.createReadStream();
+
         stream.on('data', chunk => {
             downloadedBytes += chunk.length;
-            const elapsedTime = (Date.now() - startTime) / 1000; // in seconds
-            const speed = (downloadedBytes / 1024 / elapsedTime).toFixed(2); // in KB/s
-            progressBar.update(downloadedBytes / 1024, {
-                speed: speed
+            const elapsedSeconds = (Date.now() - startTime) / 1000;
+            const speedInMBps = (downloadedBytes / (1024 * 1024) / 60) / elapsedSeconds;
+            progressBar.update(Math.floor(downloadedBytes / 1024), {
+                speed: speedInMBps.toFixed(2),
             });
         });
+
+        // Closing progress bar when the stream ends
         stream.on('end', () => {
             progressBar.stop();
         });
 
-        // Wait for the download to complete
+        // Wait for the download stream to finish and save the file
         await download.saveAs(path.join(downloadPath, download.suggestedFilename()));
 
     } catch (error) {
