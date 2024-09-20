@@ -31,6 +31,8 @@ async function downloadFromWebsite(url) {
         const downloadOptionSelector = 'button.css-wr4zx9';
         await page.waitForSelector(downloadOptionSelector, { timeout: 5000 });
         console.log('Download option found, clicking...');
+        // there is a delay before the download option is clickable
+        await page.waitForTimeout(5000);
         await page.click(downloadOptionSelector);
 
         // Wait for the download to start
@@ -38,9 +40,9 @@ async function downloadFromWebsite(url) {
         const download = await downloadPromise;
 
         // Wait for the download to complete
+        console.log('Saving file as', download.suggestedFilename());
         await download.saveAs(path.join(downloadPath, download.suggestedFilename()));
 
-        console.log('Download completed successfully!');
     } catch (error) {
         console.error('An error occurred:', error);
     } finally {
