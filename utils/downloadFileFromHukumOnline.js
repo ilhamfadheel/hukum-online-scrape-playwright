@@ -5,7 +5,7 @@ import * as cliProgress from 'cli-progress';
 
 export async function downloadFromWebsite(url) {
     // Use the current project's root path
-    const downloadPath = path.join(process.cwd(), 'output');
+    const downloadPath = path.join(process.cwd(), 'output/hukumonline/');
     if (!existsSync(downloadPath)) {
         mkdirSync(downloadPath);
     }

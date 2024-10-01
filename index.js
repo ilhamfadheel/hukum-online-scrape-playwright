@@ -1,4 +1,4 @@
-import { downloadFromWebsite } from './utils/downloadFromSite.js';
+import { downloadFromWebsite } from './utils/downloadFileFromHukumOnline.js';
 
 
 
