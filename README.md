@@ -1,16 +1,18 @@
 # Hukum Online Scraper
 
-A NodeJS web scraper for downloading documents from Hukum Online using Playwright.
+A NodeJS web scraper for downloading documents from Peraturan.go.id or Hukum Online using Playwright.
 
 ## Description
 
-This project is a web scraper designed to automatically download documents from the Hukum Online website. It uses Playwright to navigate the site, locate the download button, and save the file to a local directory.
+This project is a web scraper designed to automatically download PDF documents from the Peraturan.go.id website. It uses Playwright to navigate the site, locate PDF links, and download the files to a local directory.
 
 ## Features
 
-- Automated navigation to specified Hukum Online URLs
-- Automatic clicking of download buttons
+- Automated navigation through multiple pages of Peraturan.go.id
+- Automatic detection and downloading of PDF links
 - Saving of downloaded files to a local 'output' directory
+- Concurrent downloads with progress bars
+- Resumable downloads (skips already downloaded files)
 - Headless browser operation (can be toggled)
 
 ## Installation
@@ -42,7 +44,18 @@ To use the scraper, run the following command:
 npm start
 ```
 
-By default, the script will attempt to download from the URL specified in the `websiteUrl` variable in `index.js`. You can modify this URL to target different pages on Hukum Online.
+By default, the script will start scraping from the first page of the specified section on Peraturan.go.id. You can modify the `startUrl` in the main script to begin from a different page or section.
+
+To start from a specific page, you can pass the page number in the URL, for example:
+
+```javascript
+const startUrl = 'https://peraturan.go.id/peraturan/index.html?page=27';
+```
+## Configuration
+You can adjust the following parameters in the script:
+
+MAX_CONCURRENT_DOWNLOADS: Maximum number of concurrent downloads
+downloadPath: The directory where files will be saved
 
 ## Contributing
 

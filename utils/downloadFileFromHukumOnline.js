@@ -3,7 +3,7 @@ import path from 'path';
 import { existsSync, mkdirSync } from 'fs';
 import * as cliProgress from 'cli-progress';
 
-export async function downloadFromWebsite(url) {
+export async function downloadFileFromHukumOnline(url) {
     // Use the current project's root path
     const downloadPath = path.join(process.cwd(), 'output/hukumonline/');
     if (!existsSync(downloadPath)) {
