@@ -1,4 +1,4 @@
-# Hukum Online Scraper
+# Hukum Online & PERATURAN.GO.ID Scraper
 
 A NodeJS web scraper for downloading documents from Peraturan.go.id or Hukum Online using Playwright.
 
