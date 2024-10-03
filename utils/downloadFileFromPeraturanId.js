@@ -1,8 +1,8 @@
 import { chromium } from 'playwright';
 import path from 'path';
 import { existsSync, mkdirSync, readdirSync } from 'fs';
+import fs from 'fs';
 import * as cliProgress from 'cli-progress';
-import { writeFile } from 'fs/promises';
 import https from 'https';
 import { fileURLToPath } from 'url';
 
@@ -100,7 +100,7 @@ async function downloadFilesFromPage(links, downloadPath, existingFiles) {
     const multiBar = new cliProgress.MultiBar({
         clearOnComplete: false,
         hideCursor: true,
-        format: ' {bar} | {filename} | {percentage}% | {value}KB/{total}KB | Speed: {speed} MB/s'
+        format: ' {bar} | {filename} | {percentage}% | {value} KB | Speed: {speed} MB/s'
     }, cliProgress.Presets.shades_classic);
 
     const downloadQueue = links.filter(link => !existingFiles.has(link.filename));
@@ -121,12 +121,13 @@ async function downloadFilesFromPage(links, downloadPath, existingFiles) {
     multiBar.stop();
 }
 
+
 async function downloadFile(link, downloadPath, multiBar) {
     const fullUrl = `${BASE_URL}${link.href}`;
     const filePath = path.join(downloadPath, link.filename);
 
     try {
-        console.log(`Downloading: ${fullUrl}`);
+        console.log(`Preparing to download: ${fullUrl}`);
 
         const progressBar = multiBar.create(100, 0, {
             filename: link.filename,
@@ -147,35 +148,44 @@ function downloadWithProgress(url, filePath, progressBar) {
             const fileSize = parseInt(response.headers['content-length'], 10);
             let downloadedSize = 0;
             let startTime = Date.now();
-            let fileData = Buffer.alloc(0);
+            const fileStream = fs.createWriteStream(filePath);
 
-            // Set the total size in KB
+            // Calculate total size in KB
             const totalSizeKB = Math.floor(fileSize / 1024);
+
+            // Set the total size to totalSizeKB
             progressBar.setTotal(totalSizeKB);
 
             response.on('data', (chunk) => {
                 downloadedSize += chunk.length;
-                fileData = Buffer.concat([fileData, chunk]);
+                fileStream.write(chunk);
 
                 const elapsedSeconds = (Date.now() - startTime) / 1000;
-                const speedInMBps = (downloadedSize / (1024 * 1024)) / elapsedSeconds;
-                const progressInKB = Math.floor(downloadedSize / 1024);
+                const speedInMBps = ((downloadedSize / 1024 / 1024) / elapsedSeconds).toFixed(2);
 
-                progressBar.update(progressInKB, {
-                    speed: speedInMBps.toFixed(2)
+                const currentSizeKB = Math.floor(downloadedSize / 1024);
+
+                progressBar.update(currentSizeKB, {
+                    filename: path.basename(filePath),
+                    speed: speedInMBps, // Speed in MB/s
+                    value: currentSizeKB,          // Current size in KB
+                    total: totalSizeKB             // Total size in KB
                 });
             });
 
-            response.on('end', async () => {
-                try {
-                    await writeFile(filePath, fileData);
+            response.on('end', () => {
+                fileStream.end(() => {
+                    // Ensure it reaches 100% at the end
+                    progressBar.update(totalSizeKB, {
+                        value: totalSizeKB,
+                        total: totalSizeKB
+                    });
                     resolve();
-                } catch (error) {
-                    reject(error);
-                }
+                });
             });
 
             response.on('error', (error) => {
+                fileStream.close();
                 reject(error);
             });
 
