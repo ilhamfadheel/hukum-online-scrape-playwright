@@ -13,7 +13,9 @@ const BASE_URL = 'https://peraturan.go.id';
 const MAX_CONCURRENT_DOWNLOADS = 5;
 
 export async function downloadAllFilesFromPeraturanId(startUrl) {
-    const downloadPath = path.join(__dirname, '../output/peraturanId/');
+    // Extract the last part of the URL path (e.g., 'uu', 'perppu', 'pp', etc.)
+    const urlPath = new URL(startUrl).pathname.split('/').filter(Boolean).pop();
+    const downloadPath = path.join(__dirname, `../output/${urlPath}/`);
     if (!existsSync(downloadPath)) {
         mkdirSync(downloadPath, { recursive: true });
     }
